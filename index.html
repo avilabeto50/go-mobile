@@ -20,7 +20,7 @@
 <body>
 <div id="app">
 
-  <!-- ── Top bar ──────────────────────────────────────────────────────── -->
+  <!-- ── Top bar ─────────────────────────────────────────────────────────── -->
   <header id="topbar">
     <span id="app-logo">碁</span>
     <div id="turn-indicator">
@@ -28,80 +28,87 @@
       <span id="turn-text">Black's turn</span>
     </div>
     <div id="move-badge">M <strong>0</strong></div>
+    <button id="btn-settings" title="Settings" aria-label="Open settings">⚙</button>
   </header>
 
-  <!-- ── Board ────────────────────────────────────────────────────────── -->
+  <!-- ── Board ──────────────────────────────────────────────────────────── -->
   <main id="board-wrap">
     <canvas id="board-canvas" aria-label="Go board"></canvas>
   </main>
 
-  <!-- ── Bottom toolbar ───────────────────────────────────────────────── -->
-  <footer id="toolbar">
-
-    <!-- Row 1: Mode toggle + captures + size pills -->
-    <div id="toolbar-top">
-
-      <!-- Pass & Play / vs AI toggle -->
-      <div id="mode-toggle">
-        <button id="btn-mode-pvp"  class="mode-pill active" title="Pass &amp; Play">P&amp;P</button>
-        <button id="btn-mode-pvai" class="mode-pill"        title="Play vs GNU Go AI">vs AI</button>
+  <!-- ── Bottom action bar ─────────────────────────────────────────────── -->
+  <footer id="action-bar">
+    <div id="captures">
+      <div class="cap-item">
+        <span class="cap-dot black"></span>
+        <span class="cap-count" id="cap-black">0</span>
       </div>
-
-      <!-- Captures -->
-      <div id="captures">
-        <div class="cap-item">
-          <span class="cap-dot black"></span>
-          <span class="cap-count" id="cap-black">0</span>
-        </div>
-        <div class="cap-item">
-          <span class="cap-dot white"></span>
-          <span class="cap-count" id="cap-white">0</span>
-        </div>
-      </div>
-
-      <!-- Board size pills -->
-      <div id="size-pills">
-        <button class="size-pill" data-size="9"  id="btn-size-9">9</button>
-        <button class="size-pill" data-size="13" id="btn-size-13">13</button>
-        <button class="size-pill active" data-size="19" id="btn-size-19">19</button>
+      <div class="cap-item">
+        <span class="cap-dot white"></span>
+        <span class="cap-count" id="cap-white">0</span>
       </div>
     </div>
-
-    <!-- Row 2 (AI config) — hidden in Pass & Play mode -->
-    <div id="ai-config-panel" class="hidden">
-      <div class="ai-row">
-        <span class="ai-row-label">Play as</span>
-        <div class="ai-pills">
-          <button id="btn-playas-black" class="ai-pill active" title="Play as Black">● Black</button>
-          <button id="btn-playas-white" class="ai-pill"        title="Play as White">○ White</button>
-        </div>
-      </div>
-      <div class="ai-row">
-        <span class="ai-row-label">Level</span>
-        <div class="ai-pills">
-          <button id="btn-diff-easy"     class="ai-pill"        title="Easy — GNU Go level 1">Easy</button>
-          <button id="btn-diff-standard" class="ai-pill active" title="Standard — GNU Go level 5">Standard</button>
-          <button id="btn-diff-hard"     class="ai-pill"        title="Hard — GNU Go level 10">Hard</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Row 3: action buttons -->
-    <div id="toolbar-bottom">
-      <button id="btn-pass"      class="action-btn" title="Pass your turn">Pass</button>
-      <button id="btn-undo"      class="action-btn secondary" title="Undo">↩</button>
-      <button id="btn-territory" class="action-btn secondary hidden" title="Territory">Territory</button>
-      <button id="btn-resign"    class="action-btn danger" title="Resign">Resign</button>
+    <div id="action-btns">
+      <button id="btn-pass"      class="action-btn"           title="Pass your turn">Pass</button>
+      <button id="btn-undo"      class="action-btn secondary" title="Undo last move">↩</button>
+      <button id="btn-territory" class="action-btn secondary hidden" title="Toggle territory map">Territory</button>
+      <button id="btn-resign"    class="action-btn danger"    title="Resign the game">Resign</button>
       <button id="btn-new"       class="action-btn secondary" title="New game">New</button>
     </div>
-
   </footer>
+
 </div>
 
-<!-- ── Status toast ──────────────────────────────────────────────────── -->
+<!-- ── Settings sheet backdrop ──────────────────────────────────────────── -->
+<div id="settings-backdrop"></div>
+
+<!-- ── Settings sheet ───────────────────────────────────────────────────── -->
+<div id="settings-sheet" role="dialog" aria-label="Game settings">
+  <div id="sheet-handle"></div>
+
+  <!-- Mode -->
+  <div class="sheet-section">
+    <div class="sheet-label">Mode</div>
+    <div class="pill-row">
+      <button id="btn-mode-pvp"  class="sheet-pill active" title="Pass &amp; Play">Pass &amp; Play</button>
+      <button id="btn-mode-pvai" class="sheet-pill"        title="Play vs GNU Go AI">vs AI (GNU Go)</button>
+    </div>
+  </div>
+
+  <!-- Board size -->
+  <div class="sheet-section">
+    <div class="sheet-label">Board Size</div>
+    <div class="pill-row">
+      <button class="sheet-pill size-pill" data-size="9"  id="btn-size-9">9×9</button>
+      <button class="sheet-pill size-pill" data-size="13" id="btn-size-13">13×13</button>
+      <button class="sheet-pill size-pill active" data-size="19" id="btn-size-19">19×19</button>
+    </div>
+  </div>
+
+  <!-- AI config — shown only when vs AI mode is active -->
+  <div id="sheet-ai-section">
+    <div class="sheet-section">
+      <div class="sheet-label">Play As</div>
+      <div class="pill-row">
+        <button id="btn-playas-black" class="sheet-pill active" title="Play as Black">● Black</button>
+        <button id="btn-playas-white" class="sheet-pill"        title="Play as White">○ White</button>
+      </div>
+    </div>
+    <div class="sheet-section">
+      <div class="sheet-label">Difficulty</div>
+      <div class="pill-row">
+        <button id="btn-diff-easy"     class="sheet-pill"        title="Easy — GNU Go level 1">Easy</button>
+        <button id="btn-diff-standard" class="sheet-pill active" title="Standard — GNU Go level 5">Standard</button>
+        <button id="btn-diff-hard"     class="sheet-pill"        title="Hard — GNU Go level 10">Hard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Status toast ──────────────────────────────────────────────────────── -->
 <div id="status-toast" role="status" aria-live="polite"></div>
 
-<!-- ── Game-over modal ────────────────────────────────────────────────── -->
+<!-- ── Game-over modal ────────────────────────────────────────────────────── -->
 <div id="modal-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <div id="modal-box">
     <h2 id="modal-title">Game Over</h2>

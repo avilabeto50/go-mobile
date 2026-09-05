@@ -1,8 +1,8 @@
 /* ─────────────────────────────────────────────────────────────────────────
    style.css — Go Mobile PWA
    Design: dark, premium, mobile-first.
-   Palette: warm near-black bg, amber accent, off-white text.
-   Layout: fixed top bar + scrollable-free canvas + fixed bottom toolbar.
+   Layout: fixed topbar + board fills all space + fixed bottom action bar
+           + slide-up settings sheet for board size / mode / AI config.
    ───────────────────────────────────────────────────────────────────────── */
 
 /* ── Reset & base ──────────────────────────────────────────────────────── */
@@ -26,11 +26,9 @@
   --shadow:        0 4px 24px rgba(0,0,0,.6);
   --shadow-sm:     0 2px 8px rgba(0,0,0,.4);
 
-  /* Layout heights */
-  --topbar-h:      56px;
-  --toolbar-h:     82px;
+  --topbar-h:      54px;
+  --actionbar-h:   68px;
 
-  /* Spacing */
   --radius:        12px;
   --radius-sm:     8px;
   --radius-xs:     6px;
@@ -53,21 +51,24 @@ html, body {
 #app {
   display: flex;
   flex-direction: column;
-  height: 100dvh;         /* dynamic viewport height — handles mobile chrome */
-  height: 100vh;          /* fallback */
+  height: 100dvh;
+  height: 100vh;
   overflow: hidden;
 }
 
-/* ── Top bar ───────────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════
+   TOP BAR
+   ══════════════════════════════════════════════════════════════════════════ */
 #topbar {
   flex-shrink: 0;
   height: var(--topbar-h);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
   align-items: center;
-  padding: 0 16px;
-  gap: 12px;
+  gap: 10px;
+  padding: 0 14px;
   padding-top: env(safe-area-inset-top);
 }
 
@@ -79,18 +80,17 @@ html, body {
   flex-shrink: 0;
 }
 
-/* Turn indicator — centre of top bar */
 #turn-indicator {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 7px;
+  min-width: 0;
 }
 
 #turn-stone {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: var(--stone-black);
   border: 2px solid #444;
@@ -105,27 +105,53 @@ html, body {
 }
 
 #turn-text {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Move number badge — right of topbar */
 #move-badge {
   flex-shrink: 0;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-muted);
-  text-align: right;
   white-space: nowrap;
 }
 #move-badge strong {
   color: var(--accent);
-  font-size: 15px;
+  font-size: 14px;
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Board wrap ────────────────────────────────────────────────────────── */
+/* Settings gear button in topbar */
+#btn-settings {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 18px;
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+#btn-settings:active { transform: scale(0.92); }
+#btn-settings.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1a1200;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BOARD
+   ══════════════════════════════════════════════════════════════════════════ */
 #board-wrap {
   flex: 1;
   display: flex;
@@ -134,59 +160,52 @@ html, body {
   background: var(--bg);
   overflow: hidden;
   position: relative;
+  min-height: 0;
 }
 
 #board-canvas {
   display: block;
-  touch-action: none;   /* prevent scroll/zoom while touching the board */
+  touch-action: none;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   max-width: 100%;
   max-height: 100%;
 }
 
-/* ── Bottom toolbar ────────────────────────────────────────────────────── */
-#toolbar {
+/* ══════════════════════════════════════════════════════════════════════════
+   BOTTOM ACTION BAR  (always visible, minimal height)
+   ══════════════════════════════════════════════════════════════════════════ */
+#action-bar {
   flex-shrink: 0;
   background: var(--surface);
   border-top: 1px solid var(--border);
-  padding: 10px 12px;
-  padding-bottom: calc(10px + env(safe-area-inset-bottom));
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* Row 1: captures + board size selector */
-#toolbar-top {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  padding: 10px 12px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
 }
 
-/* Captures */
+/* ── Captures inside action bar ─────────────────────────────────────────── */
 #captures {
-  flex: 1;
   display: flex;
-  gap: 12px;
+  gap: 10px;
+  align-items: center;
+  flex-shrink: 0;
 }
 .cap-item {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
 .cap-dot {
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 .cap-dot.black { background: #555; border: 1px solid #888; }
 .cap-dot.white { background: var(--stone-white); border: 1px solid #ccc; }
-.cap-label {
-  font-size: 11px;
-  color: var(--text-muted);
-}
 .cap-count {
   font-size: 13px;
   font-weight: 700;
@@ -194,37 +213,11 @@ html, body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Board size pills */
-#size-pills {
-  display: flex;
-  gap: 4px;
-  flex-shrink: 0;
-}
-.size-pill {
-  padding: 4px 8px;
-  border: 1px solid var(--border);
-  border-radius: 99px;
-  background: var(--surface-2);
-  color: var(--text-muted);
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-  -webkit-tap-highlight-color: transparent;
-}
-.size-pill:active { transform: scale(0.94); }
-.size-pill.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #1a1200;
-}
-
-/* Row 2: action buttons */
-#toolbar-bottom {
+/* ── Action buttons ─────────────────────────────────────────────────────── */
+#action-btns {
   display: flex;
   gap: 6px;
+  flex: 1;
 }
 
 .action-btn {
@@ -262,10 +255,117 @@ html, body {
 }
 .action-btn.danger:active { background: var(--danger-hover); }
 
-/* ── Status toast ──────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════
+   SETTINGS SHEET  (slide-up overlay)
+   ══════════════════════════════════════════════════════════════════════════ */
+#settings-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0);
+  z-index: 60;
+  pointer-events: none;
+  transition: background 0.25s;
+}
+#settings-backdrop.open {
+  background: rgba(0,0,0,0.55);
+  pointer-events: auto;
+}
+
+#settings-sheet {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-radius: 20px 20px 0 0;
+  padding: 0 16px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  z-index: 61;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.6);
+}
+#settings-sheet.open {
+  transform: translateY(0);
+}
+
+/* Drag handle */
+#sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 99px;
+  margin: 12px auto 20px;
+}
+
+/* Section label */
+.sheet-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.sheet-section {
+  margin-bottom: 18px;
+}
+
+/* Pill row — shared by mode, size, play-as, difficulty */
+.pill-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sheet-pill {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  flex: 1;
+  text-align: center;
+}
+.sheet-pill:active { transform: scale(0.94); }
+.sheet-pill.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1a1200;
+}
+
+/* AI config section — hidden when in P&P mode */
+#sheet-ai-section {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.25s ease, opacity 0.2s ease;
+  margin-bottom: 0;
+}
+#sheet-ai-section.visible {
+  max-height: 200px;
+  opacity: 1;
+  margin-bottom: 18px;
+}
+
+/* Territory button in action bar — hidden until game over */
+#btn-territory {
+  flex: 1;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   STATUS TOAST
+   ══════════════════════════════════════════════════════════════════════════ */
 #status-toast {
   position: fixed;
-  bottom: calc(var(--toolbar-h) + env(safe-area-inset-bottom) + 12px);
+  bottom: calc(var(--actionbar-h) + env(safe-area-inset-bottom) + 12px);
   left: 50%;
   transform: translateX(-50%) translateY(10px);
   background: var(--surface-3);
@@ -286,7 +386,9 @@ html, body {
   transform: translateX(-50%) translateY(0);
 }
 
-/* ── Game-over modal ────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════
+   GAME-OVER MODAL
+   ══════════════════════════════════════════════════════════════════════════ */
 #modal-overlay {
   position: fixed;
   inset: 0;
@@ -341,107 +443,19 @@ html, body {
   padding: 12px 24px;
 }
 
-/* ── Utility ───────────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════
+   UTILITY + ANIMATIONS
+   ══════════════════════════════════════════════════════════════════════════ */
 .hidden { display: none !important; }
 
-/* ── Animations ─────────────────────────────────────────────────────────  */
 @keyframes fadeIn  { from { opacity: 0; }              to { opacity: 1; } }
 @keyframes slideUp { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-/* ── Mode toggle (Pass & Play / vs AI) ─────────────────────────────────── */
-#mode-toggle {
-  display: flex;
-  gap: 3px;
-  flex-shrink: 0;
-}
-
-.mode-pill {
-  padding: 4px 8px;
-  border: 1px solid var(--border);
-  border-radius: 99px;
-  background: var(--surface-2);
-  color: var(--text-muted);
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-  -webkit-tap-highlight-color: transparent;
-}
-.mode-pill:active { transform: scale(0.94); }
-.mode-pill.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #1a1200;
-}
-
-/* ── AI config panel ────────────────────────────────────────────────────── */
-#ai-config-panel {
-  background: rgba(200,165,96,0.06);
-  border: 1px solid rgba(200,165,96,0.18);
-  border-radius: var(--radius-sm);
-  padding: 8px 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  animation: fadeIn 0.18s ease;
-}
-#ai-config-panel.hidden { display: none !important; }
-
-.ai-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.ai-row-label {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-  min-width: 46px;
-}
-
-.ai-pills {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-}
-
-.ai-pill {
-  padding: 4px 10px;
-  border: 1px solid var(--border);
-  border-radius: 99px;
-  background: var(--surface-2);
-  color: var(--text-muted);
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-  -webkit-tap-highlight-color: transparent;
-}
-.ai-pill:active { transform: scale(0.94); }
-.ai-pill.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #1a1200;
-}
-
-/* ── Pulse animation for turn stone when AI is thinking ─────────────────── */
+/* AI thinking pulse */
 .pulse-thinking {
   animation: stonePulse 0.9s infinite alternate ease-in-out !important;
 }
-
 @keyframes stonePulse {
-  0%   { transform: scale(1);   box-shadow: 0 0 0px var(--accent-dim); }
+  0%   { transform: scale(1);    box-shadow: 0 0 0px  var(--accent-dim); }
   100% { transform: scale(1.18); box-shadow: 0 0 14px var(--accent); }
-}
-
-#captures {
-  justify-content: center;
 }

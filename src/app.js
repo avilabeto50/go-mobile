@@ -328,9 +328,6 @@ function updateUI() {
     btnTerritory.classList.add('hidden');
   }
 
-  if (aiConfigPanel) {
-    aiConfigPanel.classList.toggle('hidden', gameMode === 'pvp');
-  }
 }
 
 let _toastTimer = null;
@@ -503,16 +500,38 @@ canvas.addEventListener('click', (evt) => {
   if (cell) placeAt(cell.row, cell.col);
 });
 
+// ── Settings Sheet ────────────────────────────────────────────────────────
+const btnSettingsOpen = document.getElementById('btn-settings');
+const settingsSheet   = document.getElementById('settings-sheet');
+const settingsBackdrop = document.getElementById('settings-backdrop');
+const sheetAiSection  = document.getElementById('sheet-ai-section');
+
+function openSettings() {
+  settingsSheet.classList.add('open');
+  settingsBackdrop.classList.add('open');
+  btnSettingsOpen.classList.add('active');
+}
+function closeSettings() {
+  settingsSheet.classList.remove('open');
+  settingsBackdrop.classList.remove('open');
+  btnSettingsOpen.classList.remove('active');
+}
+btnSettingsOpen.addEventListener('click', () => {
+  if (settingsSheet.classList.contains('open')) closeSettings();
+  else openSettings();
+});
+settingsBackdrop.addEventListener('click', closeSettings);
+
 // ── Mode & Settings Control ────────────────────────────────────────────────
 const btnModePvp    = document.getElementById('btn-mode-pvp');
 const btnModePvai   = document.getElementById('btn-mode-pvai');
-const aiConfigPanel = document.getElementById('ai-config-panel');
 
 function setMode(mode) {
   if (gameMode === mode) return;
   gameMode = mode;
   btnModePvp.classList.toggle('active',  mode === 'pvp');
   btnModePvai.classList.toggle('active', mode === 'pvai');
+  sheetAiSection.classList.toggle('visible', mode === 'pvai');
 
   if (mode === 'pvai') {
     loadGnuGo().catch(() => {});
@@ -573,6 +592,7 @@ function selectSize(size) {
   document.querySelectorAll('.size-pill').forEach(b =>
     b.classList.toggle('active', parseInt(b.dataset.size) === size));
   boardSize = size;
+  closeSettings();
   startNewGame();
 }
 document.querySelectorAll('.size-pill').forEach(btn =>

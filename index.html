@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Go" />
+  <meta name="theme-color" content="#121212" />
+  <title>碁 Go Board Game</title>
+  <meta name="description" content="Premium offline Go board game with GNU Go AI. Works on any device." />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-512.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/style.css" />
+</head>
+<body>
+<div id="app">
+
+  <!-- ── Top bar ──────────────────────────────────────────────────────── -->
+  <header id="topbar">
+    <span id="app-logo">碁</span>
+    <div id="turn-indicator">
+      <div id="turn-stone"></div>
+      <span id="turn-text">Black's turn</span>
+    </div>
+    <div id="move-badge">M <strong>0</strong></div>
+  </header>
+
+  <!-- ── Board ────────────────────────────────────────────────────────── -->
+  <main id="board-wrap">
+    <canvas id="board-canvas" aria-label="Go board"></canvas>
+  </main>
+
+  <!-- ── Bottom toolbar ───────────────────────────────────────────────── -->
+  <footer id="toolbar">
+
+    <!-- Row 1: Mode toggle + captures + size pills -->
+    <div id="toolbar-top">
+
+      <!-- Pass & Play / vs AI toggle -->
+      <div id="mode-toggle">
+        <button id="btn-mode-pvp"  class="mode-pill active" title="Pass &amp; Play">P&amp;P</button>
+        <button id="btn-mode-pvai" class="mode-pill"        title="Play vs GNU Go AI">vs AI</button>
+      </div>
+
+      <!-- Captures -->
+      <div id="captures">
+        <div class="cap-item">
+          <span class="cap-dot black"></span>
+          <span class="cap-count" id="cap-black">0</span>
+        </div>
+        <div class="cap-item">
+          <span class="cap-dot white"></span>
+          <span class="cap-count" id="cap-white">0</span>
+        </div>
+      </div>
+
+      <!-- Board size pills -->
+      <div id="size-pills">
+        <button class="size-pill" data-size="9"  id="btn-size-9">9</button>
+        <button class="size-pill" data-size="13" id="btn-size-13">13</button>
+        <button class="size-pill active" data-size="19" id="btn-size-19">19</button>
+      </div>
+    </div>
+
+    <!-- Row 2 (AI config) — hidden in Pass & Play mode -->
+    <div id="ai-config-panel" class="hidden">
+      <div class="ai-row">
+        <span class="ai-row-label">Play as</span>
+        <div class="ai-pills">
+          <button id="btn-playas-black" class="ai-pill active" title="Play as Black">● Black</button>
+          <button id="btn-playas-white" class="ai-pill"        title="Play as White">○ White</button>
+        </div>
+      </div>
+      <div class="ai-row">
+        <span class="ai-row-label">Level</span>
+        <div class="ai-pills">
+          <button id="btn-diff-easy"     class="ai-pill"        title="Easy — GNU Go level 1">Easy</button>
+          <button id="btn-diff-standard" class="ai-pill active" title="Standard — GNU Go level 5">Standard</button>
+          <button id="btn-diff-hard"     class="ai-pill"        title="Hard — GNU Go level 10">Hard</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: action buttons -->
+    <div id="toolbar-bottom">
+      <button id="btn-pass"      class="action-btn" title="Pass your turn">Pass</button>
+      <button id="btn-undo"      class="action-btn secondary" title="Undo">↩</button>
+      <button id="btn-territory" class="action-btn secondary hidden" title="Territory">Territory</button>
+      <button id="btn-resign"    class="action-btn danger" title="Resign">Resign</button>
+      <button id="btn-new"       class="action-btn secondary" title="New game">New</button>
+    </div>
+
+  </footer>
+</div>
+
+<!-- ── Status toast ──────────────────────────────────────────────────── -->
+<div id="status-toast" role="status" aria-live="polite"></div>
+
+<!-- ── Game-over modal ────────────────────────────────────────────────── -->
+<div id="modal-overlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div id="modal-box">
+    <h2 id="modal-title">Game Over</h2>
+    <p id="modal-body"></p>
+    <div id="modal-score-details"></div>
+    <div id="modal-actions">
+      <button id="modal-territory-btn" class="action-btn secondary hidden">Territory</button>
+      <button id="modal-new-btn" class="action-btn">New Game</button>
+    </div>
+  </div>
+</div>
+
+<script src="src/rules.js"></script>
+<script src="src/gnugo.js"></script>
+<script src="src/app.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(console.warn);
+    });
+  }
+</script>
+</body>
+</html>

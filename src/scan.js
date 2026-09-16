@@ -227,7 +227,6 @@ const ScanModule = (() => {
             generationConfig: {
               temperature: 0,
               maxOutputTokens: 8192,
-              responseMimeType: 'application/json',
             },
           }),
         }
@@ -249,11 +248,26 @@ const ScanModule = (() => {
     const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!rawText) throw new Error('Empty response from Gemini. Try again.');
 
+    // Strip markdown code fences if the model wraps its output
+    const jsonText = extractJson(rawText);
+
     let parsed;
-    try { parsed = JSON.parse(rawText); }
+    try { parsed = JSON.parse(jsonText); }
     catch (_) { throw new Error('Gemini returned invalid JSON. Try again.'); }
 
     return validateGrid(parsed?.board, n);
+  }
+
+  /** Pull the first {...} block out of a string (handles ```json fences). */
+  function extractJson(text) {
+    // Try stripping markdown fences first
+    const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (fenced) return fenced[1].trim();
+    // Otherwise find the outermost { ... }
+    const start = text.indexOf('{');
+    const end   = text.lastIndexOf('}');
+    if (start !== -1 && end > start) return text.slice(start, end + 1);
+    return text.trim();
   }
 
   // ── Grid validation ──────────────────────────────────────────────────────

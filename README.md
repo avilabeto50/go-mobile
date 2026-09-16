@@ -152,7 +152,7 @@ Photograph a physical Go board and import the position digitally.
     ├─ Photo compressed to ≤1024px JPEG (85% quality) via <canvas>
     ├─ Base64-encoded
     │
-    └─ POST → Gemini 1.5 Flash API
+    └─ POST → Gemini 2.0 Flash API
          prompt: "Return a JSON {board: N×N array of B/W/.}"
          generationConfig.responseMimeType = "application/json"
               │

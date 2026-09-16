@@ -328,6 +328,14 @@ function updateUI() {
     btnTerritory.classList.add('hidden');
   }
 
+  // Scan button: only enabled at the start of a new game (no moves yet)
+  if (btnScan) {
+    btnScan.disabled = game.history.length > 0 || game.gameOver;
+    btnScan.title = btnScan.disabled
+      ? 'Scan is only available at the start of a new game'
+      : 'Scan physical board';
+  }
+
 }
 
 let _toastTimer = null;
@@ -673,6 +681,41 @@ function startNewGame() {
   }
 }
 
+// ── Apply Scanned Board ────────────────────────────────────────────────────
+/**
+ * Called by scan.js after user confirms the scanned board.
+ * @param {string[][]} grid   - N×N array of 'B' | 'W' | '.'
+ * @param {'B'|'W'}   nextPlayer - which color plays next
+ * @param {number}    capB   - stones captured by Black so far
+ * @param {number}    capW   - stones captured by White so far
+ */
+function applyScannedBoard(grid, nextPlayer, capB, capW) {
+  // Reset everything to a clean slate
+  startNewGame();
+
+  const n = boardSize;
+  // Write stone positions directly into the rules engine board
+  for (let r = 0; r < n; r++) {
+    for (let c = 0; c < n; c++) {
+      const v = grid[r]?.[c];
+      if      (v === 'B') game.engine.board[r][c] = COLOR_BLACK;
+      else if (v === 'W') game.engine.board[r][c] = COLOR_WHITE;
+      // '.' stays COLOR_EMPTY (already set by newGame)
+    }
+  }
+
+  // Set which player goes next
+  game.currentPlayer = (nextPlayer === 'W') ? COLOR_WHITE : COLOR_BLACK;
+
+  // Set capture counts
+  game.engine.captures[COLOR_BLACK] = Math.max(0, capB || 0);
+  game.engine.captures[COLOR_WHITE] = Math.max(0, capW || 0);
+
+  draw();
+  updateUI();
+  showStatus('Board imported from photo ✓', 3500);
+}
+
 // ── DOM References ─────────────────────────────────────────────────────────
 const turnStone    = document.getElementById('turn-stone');
 const turnText     = document.getElementById('turn-text');
@@ -680,8 +723,15 @@ const moveBadge    = document.getElementById('move-badge');
 const capBlackEl   = document.getElementById('cap-black');
 const capWhiteEl   = document.getElementById('cap-white');
 const statusToast  = document.getElementById('status-toast');
+const btnScan      = document.getElementById('btn-scan');
 
 // ── Initialization ─────────────────────────────────────────────────────────
 layout = computeLayout();
 draw();
 updateUI();
+
+// ── Expose internals for scan.js ───────────────────────────────────────────
+window._go = {
+  getBoardSize:       () => boardSize,
+  applyScannedBoard,
+};

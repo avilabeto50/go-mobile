@@ -28,6 +28,7 @@
       <span id="turn-text">Black's turn</span>
     </div>
     <div id="move-badge">M <strong>0</strong></div>
+    <button id="btn-scan" title="Scan physical board" aria-label="Scan board">📷</button>
     <button id="btn-settings" title="Settings" aria-label="Open settings">⚙</button>
   </header>
 
@@ -61,6 +62,9 @@
 
 <!-- ── Settings sheet backdrop ──────────────────────────────────────────── -->
 <div id="settings-backdrop"></div>
+
+<!-- ── Scan sheet backdrop ───────────────────────────────────────────────── -->
+<div id="scan-backdrop"></div>
 
 <!-- ── Settings sheet ───────────────────────────────────────────────────── -->
 <div id="settings-sheet" role="dialog" aria-label="Game settings">
@@ -105,6 +109,52 @@
   </div>
 </div>
 
+<!-- ── Scan sheet ────────────────────────────────────────────────────────── -->
+<div id="scan-sheet" role="dialog" aria-label="Scan physical Go board">
+  <div id="scan-sheet-handle"></div>
+
+  <!-- Photo preview area -->
+  <div class="sheet-section">
+    <div class="sheet-label">Scan Physical Board</div>
+    <div id="scan-preview-wrap">
+      <img id="scan-preview-img" alt="Board photo" />
+      <div id="scan-placeholder">
+        <span id="scan-placeholder-icon">📷</span>
+        <span>No photo selected</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden file input -->
+  <input id="scan-file-input" type="file" accept="image/*" capture="environment" />
+
+  <!-- API key -->
+  <div class="sheet-section">
+    <div class="sheet-label">Gemini API Key</div>
+    <input id="scan-apikey-input" type="password"
+           placeholder="Paste your API key…"
+           autocomplete="off" spellcheck="false" />
+    <p id="scan-apikey-hint">Stored locally on your device only.</p>
+  </div>
+
+  <!-- Buttons -->
+  <div id="scan-step-main">
+    <div class="pill-row">
+      <button id="btn-scan-pick" class="sheet-pill active">📷 Take / Choose Photo</button>
+    </div>
+    <div class="pill-row" style="margin-top:8px">
+      <button id="btn-scan-analyze" class="sheet-pill hidden">✨ Analyze Board</button>
+    </div>
+    <p id="scan-status-msg"></p>
+  </div>
+
+  <!-- Loading state -->
+  <div id="scan-step-loading" class="hidden">
+    <div id="scan-spinner"></div>
+    <p id="scan-loading-msg">Analyzing board…</p>
+  </div>
+</div>
+
 <!-- ── Status toast ──────────────────────────────────────────────────────── -->
 <div id="status-toast" role="status" aria-live="polite"></div>
 
@@ -121,8 +171,51 @@
   </div>
 </div>
 
+<!-- ── Scan confirm modal ─────────────────────────────────────────────────── -->
+<div id="scan-confirm-modal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="scan-confirm-title">
+  <div id="scan-confirm-box">
+    <div id="scan-confirm-icon">✓</div>
+    <h2 id="scan-confirm-title">Board Scanned!</h2>
+    <p id="scan-detected-count"></p>
+
+    <!-- Next player -->
+    <div class="scan-confirm-section">
+      <div class="sheet-label">Who plays next?</div>
+      <div class="pill-row">
+        <button id="scan-confirm-black" class="sheet-pill active">● Black</button>
+        <button id="scan-confirm-white" class="sheet-pill">○ White</button>
+      </div>
+    </div>
+
+    <!-- Captured stones -->
+    <div class="scan-confirm-section">
+      <div class="sheet-label">Captured stones</div>
+      <div id="scan-captures-row">
+        <div class="scan-cap-item">
+          <span class="cap-dot black"></span>
+          <span class="scan-cap-label">Black:</span>
+          <input id="scan-confirm-cap-b" class="scan-cap-input" type="number"
+                 min="0" max="361" value="0" inputmode="numeric" />
+        </div>
+        <div class="scan-cap-item">
+          <span class="cap-dot white"></span>
+          <span class="scan-cap-label">White:</span>
+          <input id="scan-confirm-cap-w" class="scan-cap-input" type="number"
+                 min="0" max="361" value="0" inputmode="numeric" />
+        </div>
+      </div>
+    </div>
+
+    <div id="scan-confirm-actions">
+      <button id="scan-confirm-apply" class="action-btn">Apply to Board</button>
+      <button id="scan-confirm-retake" class="action-btn secondary">Retake</button>
+    </div>
+  </div>
+</div>
+
 <script src="src/rules.js"></script>
 <script src="src/gnugo.js"></script>
+<script src="src/scan.js"></script>
 <script src="src/app.js"></script>
 <script>
   if ('serviceWorker' in navigator) {

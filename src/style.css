@@ -85,7 +85,7 @@ body {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: auto 1fr auto auto auto;
   align-items: center;
   gap: 10px;
   padding: 0 14px;
@@ -480,3 +480,269 @@ body {
   0%   { transform: scale(1);    box-shadow: 0 0 0px  var(--accent-dim); }
   100% { transform: scale(1.18); box-shadow: 0 0 14px var(--accent); }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SCAN — TOPBAR BUTTON
+   ══════════════════════════════════════════════════════════════════════════ */
+#btn-scan {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.15s, color 0.15s, transform 0.15s, opacity 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+#btn-scan:active:not(:disabled) { transform: scale(0.92); }
+#btn-scan.active {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+#btn-scan:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SCAN — BACKDROP
+   ══════════════════════════════════════════════════════════════════════════ */
+#scan-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0);
+  z-index: 62;
+  pointer-events: none;
+  transition: background 0.25s;
+}
+#scan-backdrop.open {
+  background: rgba(0,0,0,0.55);
+  pointer-events: auto;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SCAN — SHEET
+   ══════════════════════════════════════════════════════════════════════════ */
+#scan-sheet {
+  position: fixed;
+  left: env(safe-area-inset-left, 0px);
+  right: env(safe-area-inset-right, 0px);
+  bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-radius: 20px 20px 0 0;
+  padding: 0 16px 20px;
+  z-index: 63;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.6);
+  overflow-y: auto;
+  max-height: 85vh;
+}
+#scan-sheet.open { transform: translateY(0); }
+
+#scan-sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 99px;
+  margin: 12px auto 20px;
+}
+
+/* ── Photo preview ───────────────────────────────────────────────────────── */
+#scan-preview-wrap {
+  width: 100%;
+  height: 200px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+#scan-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: none;
+}
+#scan-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+#scan-placeholder-icon { font-size: 32px; opacity: 0.5; }
+
+/* ── Hidden file input ───────────────────────────────────────────────────── */
+#scan-file-input { display: none; }
+
+/* ── API key input ───────────────────────────────────────────────────────── */
+#scan-apikey-input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  margin-bottom: 4px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+#scan-apikey-input:focus { border-color: var(--accent); }
+
+#scan-apikey-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ── Status / error message ──────────────────────────────────────────────── */
+#scan-status-msg {
+  font-size: 12px;
+  min-height: 18px;
+  margin-top: 8px;
+  text-align: center;
+  color: var(--danger-hover);
+}
+
+/* ── Loading state ───────────────────────────────────────────────────────── */
+#scan-step-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 0 8px;
+  gap: 14px;
+}
+#scan-spinner {
+  width: 38px;
+  height: 38px;
+  border: 3px solid var(--surface-3);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: scanSpin 0.75s linear infinite;
+}
+@keyframes scanSpin { to { transform: rotate(360deg); } }
+#scan-loading-msg {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SCAN — CONFIRM MODAL
+   ══════════════════════════════════════════════════════════════════════════ */
+#scan-confirm-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 110;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  padding: 24px;
+  animation: fadeIn 0.2s ease;
+}
+#scan-confirm-modal.hidden { display: none; }
+
+#scan-confirm-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  animation: slideUp 0.25s ease;
+}
+
+#scan-confirm-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #1a1200;
+  font-size: 24px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+
+#scan-confirm-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+#scan-detected-count {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.scan-confirm-section {
+  text-align: left;
+  margin-bottom: 16px;
+}
+
+/* ── Captures row ────────────────────────────────────────────────────────── */
+#scan-captures-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.scan-cap-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+.scan-cap-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  flex-shrink: 0;
+}
+.scan-cap-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 6px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  transition: border-color 0.15s;
+}
+.scan-cap-input:focus { border-color: var(--accent); }
+.scan-cap-input::-webkit-inner-spin-button,
+.scan-cap-input::-webkit-outer-spin-button { opacity: 1; }
+
+/* ── Confirm action buttons ──────────────────────────────────────────────── */
+#scan-confirm-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+#scan-confirm-actions .action-btn { flex: 1; }
